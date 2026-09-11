@@ -1,0 +1,36 @@
+services:
+    postgres:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_DB: users_db
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: secret
+        ports:
+            - "5432:5432"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+    backend:
+        image: ghcr.io/stackoverflowisbetterthananyai/fullstack-test-backend:latest
+        ports:
+            - "8888:8888"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_NAME=users_db
+            - DB_USER=postgres
+            - DB_PASSWORD=secret
+        depends_on:
+            - postgres
+
+    frontend:
+        image: ghcr.io/stackoverflowisbetterthananyai/fullstack-test-frontend:latest
+        ports:
+            - "3000:3000"
+        environment:
+            - SERVER_ADDRESS=http://backend:8888
+        depends_on:
+            - backend
+
+volumes:
+    pgdata:
